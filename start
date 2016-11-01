@@ -1,0 +1,33 @@
+#!/bin/bash
+
+debug() {
+  [[ "$DEBUG" ]] && echo "-----> $*" 1>&2
+}
+
+aws_config() {
+    cat > /tmp/aws_config <<EOF
+[profile default]
+aws_access_key_id = $AWS_ACCESS_KEY_ID
+aws_secret_access_key= $AWS_SECRET_ACCESS_KEY
+region = $AWS_DEFAULT_REGION
+
+[profile role]
+role_arn = $AWS_ROLE_ARN
+source_profile = default
+region = $AWS_DEFAULT_REGION
+output = table
+EOF
+
+    unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
+    export AWS_CONFIG_FILE=/tmp/aws_config
+    [[ "$AWS_ROLE_ARN" ]] && export AWS_DEFAULT_PROFILE=role
+}
+
+main() {
+    : ${AWS_ACCESS_KEY_ID:? requred}
+    : ${AWS_SECRET_ACCESS_KEY:? required}
+    aws_config
+    "$@"
+}
+
+[[ "$0" == "$BASH_SOURCE" ]] && main "$@" || true
