@@ -23,11 +23,25 @@ EOF
     [[ "$AWS_ROLE_ARN" ]] && export AWS_DEFAULT_PROFILE=role
 }
 
+ec2_list_running() {
+    echo ap-south-1 eu-west-1 ap-southeast-1 ap-southeast-2 eu-central-1 ap-northeast-2 ap-northeast-1 us-east-1 sa-east-1 us-west-1 us-west-2 \
+      | xargs -P 20 -n 1  \
+        aws ec2 describe-instances \
+         --filters Name=instance-state-name,Values=running \
+         --query "Reservations[].Instances[].{${QUERY}}" \
+         --out table \
+         --region
+}
+
 main() {
     : ${AWS_ACCESS_KEY_ID:? requred}
     : ${AWS_SECRET_ACCESS_KEY:? required}
+    : ${QUERY:='id: InstanceId, region: Placement.AvailabilityZone, started: LaunchTime, pubIp: PublicIpAddress, stack: join(``, Tags[?Key==`aws:cloudformation:stack-name`].Value || `[]`), name: join(``, Tags[?Key==`Name`].Value || `[]`), owner: join(``, Tags[?(Key==`owner` || Key==`Owner`)].Value || `[]`) '}
     aws_config
-    "$@"
+   [[ "$QUERY_BASE64" ]] && QUERY=$(base64 -d <<<"$QUERY_BASE64")
+    
+   #"$@"
+   ec2_list_running
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && main "$@" || true
