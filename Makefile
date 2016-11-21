@@ -3,6 +3,9 @@ IMAGE=lalyos/cmd-aws
 build:
 	docker build . -t $(IMAGE)
 
+push: build
+	docker push $(IMAGE)
+
 run: build
 	docker run -it \
 	  -e AWS_ROLE_ARN=$$AWS_ROLE_ARN \
