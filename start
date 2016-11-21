@@ -36,7 +36,7 @@ ec2_list_running() {
 main() {
     : ${AWS_ACCESS_KEY_ID:? requred}
     : ${AWS_SECRET_ACCESS_KEY:? required}
-    : ${QUERY:='id: InstanceId, region: Placement.AvailabilityZone, started: LaunchTime, pubIp: PublicIpAddress, stack: join(``, Tags[?Key==`aws:cloudformation:stack-name`].Value || `[]`), name: join(``, Tags[?Key==`Name`].Value || `[]`), owner: join(``, Tags[?(Key==`owner` || Key==`Owner`)].Value || `[]`) '}
+    : ${QUERY:='id: InstanceId, region: Placement.AvailabilityZone, started: LaunchTime, pubIp: PublicIpAddress, name: join(``, Tags[?Key==`Name`].Value || `[]`)'}
     aws_config
    [[ "$QUERY_BASE64" ]] && QUERY=$(base64 -d <<<"$QUERY_BASE64")
     
